@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\POSController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -15,9 +20,23 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    // Dashboard - Administrator overview
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // POS - Point of Sale interface
+    Route::controller(POSController::class)->group(function () {
+        Route::get('/pos', 'index')->name('pos.index');
+        Route::post('/pos', 'store')->name('pos.store');
+    });
+    
+    // Product Management
+    Route::resource('products', ProductController::class);
+    
+    // Category Management
+    Route::resource('categories', CategoryController::class);
+    
+    // Transaction Management
+    Route::resource('transactions', TransactionController::class)->only(['index', 'show']);
 });
 
 require __DIR__.'/settings.php';
